@@ -1,67 +1,81 @@
 import React from "react";
 
-class SemOneCalc extends React.Component {
+class GPAForm extends React.Component {
     constructor(props) {
         super(props);
+        // INITIALIZE STATE VARIABLES
         this.state = {
-            courses: [],
-            name: "",
-            grade: "",
-            credit: "",
-            totalGradePoints: 0,
-            totalCredits: 0,
-            cumulativeGPA: 0,
+            courses: [], 
+            grade: "", 
+            credit: "", 
+            totalGradePoints: 0, 
+            totalCredits: 0, 
+            cumulativeGPA: 0, 
         };
 
+        // BIND METHODS TO THE COMPONENT INSTANCE
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.calculateGPA = this.calculateGPA.bind(this);
     }
 
+    // HANDLE CHANGE EVENT FOR INPUT FIELDS
     handleChange(event) {
         const { name, value } = event.target;
         this.setState({ [name]: value });
     }
 
+    // HANDLE FORM SUBMISSION
     handleSubmit(event) {
-        event.preventDefault();
+        event.preventDefault(); // PREVENT DEFAULT FORM SUBMISSION BEHAVIOR
         const { name, grade, credit, courses } = this.state;
-        const newCourse = { name, grade: parseInt(grade), credit: parseInt(credit) };
+        const newCourse = { name, grade: parseInt(grade), credit: parseInt(credit) }; // CREATE NEW COURSE OBJECT
 
+        // UPDATE STATE WITH NEW COURSE AND RESET INPUT FIELDS
         this.setState(
             {
-                courses: [...courses, newCourse],
-                name: "",
-                grade: "",
-                credit: "",
+                courses: [...courses, newCourse], // ADD NEW COURSE TO COURSES ARRAY
+                name: "", // RESET COURSE NAME INPUT
+                grade: "", // RESET GRADE INPUT
+                credit: "", // RESET CREDIT INPUT
             },
-            this.calculateGPA
+            () => {
+                this.calculateGPA(); // CALL CALCULATE GPA AFTER STATE UPDATE
+            }
         );
     }
 
+    // CALCULATE GPA BASED ON COURSES
     calculateGPA() {
         const { courses } = this.state;
         let totalGradePoints = 0;
         let totalCredits = 0;
 
+        // LOOP THROUGH EACH COURSE TO CALCULATE TOTAL GRADE POINTS AND CREDITS
         courses.forEach(course => {
-            if (course.credit > 0) {
-                const gradePoints = course.grade * course.credit;
-                totalGradePoints += gradePoints;
-                totalCredits += course.credit;
+            if (course.credit > 0) { // ONLY INCLUDE COURSES WITH NON-ZERO CREDITS
+                const gradePoints = course.grade * course.credit; // CALCULATE GRADE POINTS FOR COURSE
+                totalGradePoints += gradePoints; // ADD TO TOTAL GRADE POINTS
+                totalCredits += course.credit; // ADD TO TOTAL CREDITS
             }
         });
 
+        // CALCULATE CUMULATIVE GPA
         const cumulativeGPA = totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : 0;
 
-        this.setState({ totalGradePoints, totalCredits, cumulativeGPA });
+        console.log("Calculating GPA:", totalGradePoints, totalCredits, cumulativeGPA);
+        // UPDATE STATE WITH CALCULATED VALUES AND CALL PARENT COMPONENT'S onUpdate METHOD
+        this.setState({ totalGradePoints, totalCredits, cumulativeGPA }, () => {
+            this.props.onUpdate(totalGradePoints, totalCredits); // PASS TOTAL GRADE POINTS AND CREDITS TO PARENT COMPONENT
+        });
     }
 
     render() {
-        const { name, grade, credit, courses, totalGradePoints, totalCredits, cumulativeGPA } = this.state;
+        const { name, grade, credit, courses, cumulativeGPA } = this.state;
 
         return (
             <div>
-                <h1>Semester One GPA Calculation</h1>
+                <h2>{this.props.title}</h2>
                 <form onSubmit={this.handleSubmit}>
                     <div>
                         <label>
@@ -104,8 +118,6 @@ class SemOneCalc extends React.Component {
                     </tbody>
                 </table>
                 <div>
-                    <p>Total Grade Points: {totalGradePoints}</p>
-                    <p>Total Credits: {totalCredits}</p>
                     <p>Cumulative GPA: {cumulativeGPA}</p>
                 </div>
             </div>
@@ -113,4 +125,4 @@ class SemOneCalc extends React.Component {
     }
 }
 
-export default SemOneCalc;
+export default GPAForm;
