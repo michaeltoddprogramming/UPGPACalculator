@@ -1,115 +1,67 @@
-import React from "react";
-import Navigation from "../components/Navigation";
+import React, { useState } from 'react';
+import {
+  Container,
+  Typography,
+  Paper,
+  Card,
+  CardContent,
+  useTheme
+} from '@mui/material';
 import GPAForm from "../components/GPAForm";
 
-class Home extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectedOption: "",
-            totalGradePointsSemOne: 0,
-            totalCreditsSemOne: 0,
-            totalGradePointsSemTwo: 0,
-            totalCreditsSemTwo: 0,
-            cumulativeGPAOverall: 0,
-        };
+const Home = () => {
+    const theme = useTheme();
+    const [decimalPlaces, setDecimalPlaces] = useState(2);
+    const [gpaData, setGpaData] = useState({
+      totalGradePoints: 0,
+      totalCredits: 0,
+      cumulativeGPA: 0
+    });
+  
+    const handleDecimalChange = (newDecimals) => {
+      setDecimalPlaces(newDecimals);
+      if (gpaData.totalCredits > 0) {
+        const rawGPA = gpaData.totalGradePoints / gpaData.totalCredits;
+        setGpaData(prev => ({
+          ...prev,
+          cumulativeGPA: Number(rawGPA.toFixed(newDecimals))
+        }));
+      }
+    };
+  
+    const updateGPA = (gradePoints, credits) => {
+      const rawGPA = credits > 0 ? gradePoints / credits : 0;
+      
+      setGpaData({
+        totalGradePoints: Math.round(gradePoints), // Round grade points
+        totalCredits: credits,
+        cumulativeGPA: Number(rawGPA.toFixed(decimalPlaces))
+      });
+    };
 
-        this.handleOptionChange = this.handleOptionChange.bind(this);
-        this.updateSemOneGPA = this.updateSemOneGPA.bind(this);
-        this.updateSemTwoGPA = this.updateSemTwoGPA.bind(this);
-        this.calculateGPAOverall = this.calculateGPAOverall.bind(this);
-    }
+  return (
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
 
-    handleOptionChange(event) {
-        this.setState({ selectedOption: event.target.value });
-    }
+        <GPAForm 
+          onUpdate={updateGPA}
+          decimalPlaces={decimalPlaces}
+          onDecimalChange={handleDecimalChange}
+        />
 
-    updateSemOneGPA(totalGradePoints, totalCredits) {
-        console.log("Updating Semester One GPA:", totalGradePoints, totalCredits);
-        this.setState(
-            {
-                totalGradePointsSemOne: totalGradePoints,
-                totalCreditsSemOne: totalCredits,
-            },
-            this.calculateGPAOverall // CALLBACK TO CALCULATE OVERALL GPA
-        );
-    }
-
-    updateSemTwoGPA(totalGradePoints, totalCredits) {
-        console.log("Updating Semester Two GPA:", totalGradePoints, totalCredits);
-        this.setState(
-            {
-                totalGradePointsSemTwo: totalGradePoints,
-                totalCreditsSemTwo: totalCredits,
-            },
-            this.calculateGPAOverall // CALLBACK TO CALCULATE OVERALL GPA
-        );
-    }
-
-    calculateGPAOverall() {
-        const { totalGradePointsSemOne, totalCreditsSemOne, totalGradePointsSemTwo, totalCreditsSemTwo } = this.state;
-        const totalGradePoints = totalGradePointsSemOne + totalGradePointsSemTwo;
-        const totalCredits = totalCreditsSemOne + totalCreditsSemTwo;
-
-        const cumulativeGPA = totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : 0;
-
-        console.log("Calculating Overall GPA:", totalGradePoints, totalCredits, cumulativeGPA);
-        this.setState({ cumulativeGPAOverall: cumulativeGPA });
-    }
-
-    render() {
-        const { selectedOption, cumulativeGPAOverall } = this.state;
-
-        return (
-            <div>
-                <Navigation />
-                <div>
-                    <h1>GPA Calculation</h1>
-                    <div>
-                        <label>
-                            <input
-                                type="radio"
-                                value="semOne"
-                                checked={selectedOption === "semOne"}
-                                onChange={this.handleOptionChange}
-                            />
-                            Semester One
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                value="semTwo"
-                                checked={selectedOption === "semTwo"}
-                                onChange={this.handleOptionChange}
-                            />
-                            Semester Two
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                value="fullYear"
-                                checked={selectedOption === "fullYear"}
-                                onChange={this.handleOptionChange}
-                            />
-                            Full Year
-                        </label>
-                    </div>
-                    {selectedOption === "semOne" && <GPAForm title="Semester One" onUpdate={this.updateSemOneGPA} />}
-                    {selectedOption === "semTwo" && <GPAForm title="Semester Two" onUpdate={this.updateSemTwoGPA} />}
-                    {selectedOption === "fullYear" && (
-                        <div>
-                            <GPAForm title="Semester One" onUpdate={this.updateSemOneGPA} />
-                            <GPAForm title="Semester Two" onUpdate={this.updateSemTwoGPA} />
-                            <h2>Overall GPA for the Year</h2>
-                            <div>
-                                <p>Cumulative GPA for the Year: {cumulativeGPAOverall}</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    }
-}
+        <Card elevation={2} sx={{ mt: 4, background: theme.palette.primary.main, color: 'white' }}>
+          <CardContent>
+            <Typography variant="h5" gutterBottom>
+              Current GPA
+            </Typography>
+            <Typography variant="h4">
+              {gpaData.cumulativeGPA.toFixed(decimalPlaces)}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Paper>
+    </Container>
+  );
+};
 
 export default Home;
