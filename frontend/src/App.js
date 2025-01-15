@@ -100,9 +100,9 @@ const AppContent = () => {
 
   const navItems = [
     { title: 'GPA Calculator', path: '/' },
-    { title: 'Past Papers', path: '/papers' },
-    { title: 'About', path: '/about' },
-    { title: 'Contact', path: '/contact' }
+    // { title: 'Past Papers', path: '/papers' },
+    // { title: 'About', path: '/about' },
+    // { title: 'Contact', path: '/contact' }
   ];
 
   return (
@@ -140,7 +140,7 @@ const AppContent = () => {
                 letterSpacing: '.1rem'
               }}
             >
-              UP GPA CALC
+              GPA Calculator
             </Typography>
 
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
@@ -206,9 +206,9 @@ const AppContent = () => {
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/dont-click" element={<DontClickMe />} />
+            {/* <Route path="/about" element={<About />} /> */}
+            {/* <Route path="/contact" element={<Contact />} /> */}
+            {/* <Route path="/dont-click" element={<DontClickMe />} /> */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>
