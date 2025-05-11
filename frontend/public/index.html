@@ -65,22 +65,30 @@
     <!-- Preconnect to Analytics -->
     <link rel="preconnect" href="https://www.google-analytics.com">
     
-    <!-- Google Analytics Script -->
-        <!-- Replace your existing GA script with this: -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BHQ99ZXDGP"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       
-      // Check if we're on localhost
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        gtag('config', 'G-BHQ99ZXDGP', { 'cookie_domain': 'none' });
-        console.log('Google Analytics initialized for localhost');
-      } else {
-        gtag('config', 'G-BHQ99ZXDGP');
-        console.log('Google Analytics initialized for production');
+      // Extract the root domain for proper cookie setting
+      function getRootDomain() {
+        const hostname = window.location.hostname;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return 'none';
+        }
+        
+        const parts = hostname.split('.');
+        if (parts[0] === 'www') {
+          parts.shift();
+        }
+        return parts.join('.');
       }
+      
+      // Configure with explicit domain parameter
+      gtag('config', 'G-BHQ99ZXDGP', {
+        'cookie_domain': getRootDomain()
+      });
     </script>
 </head>
 <body>

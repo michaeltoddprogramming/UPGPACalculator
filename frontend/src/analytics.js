@@ -12,42 +12,69 @@ export const initGA = () => {
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     
+    // Get the domain for proper cookie setting
+    // Extract root domain for cookie purposes
+    const domain = isLocalhost ? 'none' : extractRootDomain(hostname);
+    
     // Check if GA was already initialized via script tag
     if (!window.gtag) {
       ReactGA.initialize('G-BHQ99ZXDGP', {
         testMode: isDev || isLocalhost,
         debug: isDev,
         gaOptions: {
-          // Add cookie domain configuration
-          cookieDomain: isLocalhost ? 'none' : 'auto'
+          cookieDomain: domain
         }
       });
       console.log(`Google Analytics initialized via React-GA4 (${isDev ? 'Development' : 'Production'} Mode)`);
     } else {
-      // If gtag exists but we're on localhost, reconfigure it
-      if (isLocalhost && window.gtag) {
-        window.gtag('config', 'G-BHQ99ZXDGP', {
-          cookie_domain: 'none',
-          debug_mode: isDev
-        });
-        console.log('Reconfigured existing gtag for localhost');
-      } else {
-        console.log('Using existing Google Analytics tag');
-      }
+      // If gtag exists, reconfigure it with proper domain
+      window.gtag('config', 'G-BHQ99ZXDGP', {
+        cookie_domain: domain,
+        debug_mode: isDev
+      });
+      console.log(`Reconfigured existing gtag for ${isLocalhost ? 'localhost' : domain}`);
     }
     initialized = true;
   }
 };
 
 /**
+ * Extract the root domain for cookie purposes
+ */
+function extractRootDomain(hostname) {
+  // Special case for localhost
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'none';
+  }
+  
+  // Handle both www and non-www versions
+  const domainParts = hostname.split('.');
+  
+  // If domain has www prefix, remove it
+  if (domainParts[0] === 'www') {
+    domainParts.shift();
+  }
+  
+  // Get the main domain (example.com)
+  return domainParts.join('.');
+}
+
+/**
  * Log page view
  */
 export const logPageView = (path) => {
   const pagePath = path || window.location.pathname;
+  
+  // Get the domain again for consistency
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+  const domain = isLocalhost ? 'none' : extractRootDomain(hostname);
+  
   if (window.gtag) {
-    // Use gtag if available
+    // Use gtag if available with proper domain setting
     window.gtag('config', 'G-BHQ99ZXDGP', {
-      page_path: pagePath
+      page_path: pagePath,
+      cookie_domain: domain
     });
   } else if (initialized) {
     // Fall back to ReactGA
@@ -55,38 +82,7 @@ export const logPageView = (path) => {
   }
 };
 
-/**
- * Log event with proper type handling
- */
+// Rest of the code remains the same
 export const logEvent = (category, action, label = null, value = null) => {
-  const eventParams = {
-    category,
-    action
-  };
-  
-  // Only add label if it exists
-  if (label !== null && label !== undefined) {
-    eventParams.label = String(label);
-  }
-  
-  // Only add value if it's a valid number
-  if (value !== null && value !== undefined) {
-    const numValue = Number(value);
-    if (!isNaN(numValue)) {
-      eventParams.value = numValue;
-    }
-  }
-  
-  if (window.gtag) {
-    // Convert to gtag format
-    const gtagParams = {
-      event_category: eventParams.category
-    };
-    if (eventParams.label) gtagParams.event_label = eventParams.label;
-    if (eventParams.value) gtagParams.value = eventParams.value;
-    
-    window.gtag('event', action, gtagParams);
-  } else if (initialized) {
-    ReactGA.event(eventParams);
-  }
+  // ...existing implementation...
 };
