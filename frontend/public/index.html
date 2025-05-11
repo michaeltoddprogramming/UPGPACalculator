@@ -66,12 +66,21 @@
     <link rel="preconnect" href="https://www.google-analytics.com">
     
     <!-- Google Analytics Script -->
+        <!-- Replace your existing GA script with this: -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-BHQ99ZXDGP"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-BHQ99ZXDGP');
+      
+      // Check if we're on localhost
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        gtag('config', 'G-BHQ99ZXDGP', { 'cookie_domain': 'none' });
+        console.log('Google Analytics initialized for localhost');
+      } else {
+        gtag('config', 'G-BHQ99ZXDGP');
+        console.log('Google Analytics initialized for production');
+      }
     </script>
 </head>
 <body>
