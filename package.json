@@ -4,10 +4,12 @@
   "description": "GPA Calculator - Specifically Designed for the University of Pretoria",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack && babel backend/server.js -d backend/dist",
+    "build": "webpack --mode production && babel backend/server.js -d backend/dist && node frontend/src/sitemap-generator.js",
+    "build:dev": "webpack --mode development && babel backend/server.js -d backend/dist",
     "start": "npm run build && node backend/dist/server.js",
-    "watch": "webpack -w"
+    "start:dev": "npm run build:dev && node backend/dist/server.js",
+    "watch": "webpack -w --mode development",
+    "generate-sitemap": "node frontend/src/sitemap-generator.js"
   },
   "repository": {
     "type": "git",
@@ -31,6 +33,7 @@
     "path": "^0.12.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-ga4": "^2.1.0",
     "react-router-dom": "^6.28.0",
     "styled-components": "^6.1.14"
   },

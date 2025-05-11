@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
@@ -30,6 +30,7 @@ import Home from "./pages/Home";
 import About from "./pages/About"; 
 import Contact from "./pages/Contact";
 import DontClickMe from "./pages/DontClickMe";
+import { initGA, logPageView } from './analytics';
 
 const NotFound = () => (
   <Box sx={{ textAlign: 'center', mt: 8 }}>
@@ -43,6 +44,16 @@ const AppContent = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width:800px)');
   const location = useLocation();
+
+  // Initialize Google Analytics
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  // Log page view when location changes
+  useEffect(() => {
+    logPageView();
+  }, [location]);
 
   const theme = createTheme({
     palette: {
@@ -203,14 +214,22 @@ const AppContent = () => {
           </Box>
         </Drawer>
 
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        
+        <Container component="main" maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* <Route path="/about" element={<About />} /> */}
-            {/* <Route path="/contact" element={<Contact />} /> */}
-            {/* <Route path="/dont-click" element={<DontClickMe />} /> */}
+            {/* Other routes */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          
+          <footer style={{ marginTop: '2rem', padding: '1rem 0', borderTop: '1px solid #eaeaea' }}>
+            <Typography variant="body2" color="textSecondary" align="center">
+              © {new Date().getFullYear()} GPA Calculator for South African Universities
+            </Typography>
+            <Typography variant="body2" color="textSecondary" align="center">
+              Created by <a href="https://github.com/michaeltoddprogramming">Michael Todd</a>
+            </Typography>
+          </footer>
         </Container>
       </Box>
     </ThemeProvider>

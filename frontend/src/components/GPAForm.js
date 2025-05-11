@@ -31,6 +31,8 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { Edit as EditIcon, Close as CloseIcon } from '@mui/icons-material';
 import { Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
+// Add import for analytics
+import { logEvent } from '../analytics';
 
 const GPAForm = ({ onUpdate, decimalPlaces, onDecimalChange }) => {
     const theme = useTheme();
@@ -50,12 +52,19 @@ const GPAForm = ({ onUpdate, decimalPlaces, onDecimalChange }) => {
 const [openInfo, setOpenInfo] = useState(false);
 
 // Add handlers
-const handleInfoOpen = () => setOpenInfo(true);
+const handleInfoOpen = () => {
+  // Track info dialog open
+  logEvent('GPA Calculator', 'Open Info Dialog');
+  setOpenInfo(true);
+};
 const handleInfoClose = () => setOpenInfo(false);
 
    const handleEdit = (index) => {
     // Validate index
     if (index < 0 || index >= courses.length) return;
+    
+    // Track edit action
+    logEvent('GPA Calculator', 'Start Edit Course', `Course: ${courses[index].name}`);
     
     // Set editing state
     setEditingIndex(index);
@@ -94,6 +103,10 @@ const handleInfoClose = () => setOpenInfo(false);
 };
 const handleDecimalPlaceChange = (e) => {
     const newDecimals = Number(e.target.value);
+    
+    // Track decimal place changes
+    logEvent('GPA Calculator', 'Change Decimal Places', `Decimals: ${newDecimals}`, newDecimals);
+    
     onDecimalChange(newDecimals);
     calculateGPA(courses, newDecimals);
   };
@@ -110,6 +123,13 @@ const handleDecimalPlaceChange = (e) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true);
+    
+    // Track course addition/editing with analytics
+    logEvent(
+      'GPA Calculator', 
+      editingIndex !== null ? 'Edit Course' : 'Add Course',
+      `Course count: ${courses.length + (editingIndex === null ? 1 : 0)}`
+    );
   
     const newCourseData = {
       name: formData.name || `Course ${courseCount}`,
@@ -140,11 +160,17 @@ const handleDecimalPlaceChange = (e) => {
 
   // Add cancel edit handler
   const handleCancelEdit = () => {
+    // Track cancel edit action
+    logEvent('GPA Calculator', 'Cancel Edit');
+    
     setEditingIndex(null);
     setFormData({ name: '', grade: '', credit: '' });
   };
 
   const handleDelete = (index) => {
+    // Track course deletion
+    logEvent('GPA Calculator', 'Delete Course', `Remaining courses: ${courses.length - 1}`);
+    
     setCourses(prev => {
       const newCourses = prev.filter((_, i) => i !== index);
       // Rename courses after deletion to maintain sequence
